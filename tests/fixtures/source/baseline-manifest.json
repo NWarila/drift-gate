@@ -1,0 +1,8 @@
+{
+  "version": "1",
+  "files": [
+    { "source": "alpha.md", "target": "alpha.md" },
+    { "source": "beta.md",  "target": "beta.md" },
+    { "source": "gamma.md", "target": "gamma.md" }
+  ]
+}
