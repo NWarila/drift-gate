@@ -105,6 +105,11 @@ runs:
         HEAD_SHA: ${{ steps.refs.outputs.consumer-ref }}
         MANIFEST: ${{ inputs.manifest }}
         CHECK_NAME: ${{ inputs.check-name }}
+        SOURCE_REPO: ${{ inputs.source-repo }}
+        SOURCE_REF: ${{ inputs.source-ref }}
+        # The drift-gate action's own SHA, for the rendered footer. Falls back
+        # to the action_ref if the action wasn't checked out by SHA.
+        GATE_VERSION: ${{ github.action_ref }}
       run: |
         set -euo pipefail
         if python -m baseline.cli \
@@ -114,6 +119,9 @@ runs:
             --output-mode check-run \
             --head-sha "${HEAD_SHA}" \
             --repo "${REPO}" \
+            --source-repo "${SOURCE_REPO}" \
+            --source-ref "${SOURCE_REF}" \
+            --gate-version "${GATE_VERSION}" \
             --check-name "${CHECK_NAME}" \
             --step-summary "${GITHUB_STEP_SUMMARY:-/dev/null}"; then
           echo "passed=true" >> "${GITHUB_OUTPUT}"
