@@ -86,7 +86,6 @@ pass for any branch protection rule that requires both.
 | `consumer-ref` | no | PR head SHA, or `github.sha` | Git ref of the consumer to check. |
 | `check-name` | no | `drift-gate / verify` | Name displayed for the GitHub Check Run. |
 | `github-token` | no | `${{ github.token }}` | Token used to POST Check Runs. |
-| `python-version` | no | `3.12` | Python version used to run the check. |
 
 ## Outputs
 

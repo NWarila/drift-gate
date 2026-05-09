@@ -14,9 +14,11 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Topic :: Software Development :: Quality Assurance",
 ]
-dependencies = [
-    "pydantic>=2.0,<3",
-]
+# No runtime dependencies. drift-gate uses only the Python stdlib so it
+# can run on any GitHub-hosted runner with the bundled Python 3.12 — no
+# pip install on the consumer's hot path. Local development still uses
+# pyproject.toml via `pip install -e '.[dev]'` for pytest/ruff.
+dependencies = []
 
 [project.optional-dependencies]
 dev = [
