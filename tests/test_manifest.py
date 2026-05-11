@@ -27,6 +27,36 @@ def test_minimal_valid_manifest():
     assert len(m.files) == 1
     assert m.files[0].source == "a.md"
     assert m.files[0].target == "a.md"
+    assert m.scaffold_starter is None
+
+
+def test_v2_manifest_enforces_byte_identical_only():
+    m = _validate_manifest_dict(
+        {
+            "version": "2",
+            "byte_identical": [{"source": "policy.rego", "target": "policy.rego"}],
+            "scaffold_starter": [
+                {"source": "starter.rego", "target": "starter.rego"}
+            ],
+        }
+    )
+    assert m.version == "2"
+    assert len(m.files) == 1
+    assert m.files[0].source == "policy.rego"
+    assert m.scaffold_starter is not None
+    assert m.scaffold_starter[0].source == "starter.rego"
+
+
+def test_v2_allows_empty_scaffold_starter():
+    m = _validate_manifest_dict(
+        {
+            "version": "2",
+            "byte_identical": [{"source": "a.md", "target": "a.md"}],
+            "scaffold_starter": [],
+        }
+    )
+    assert len(m.files) == 1
+    assert m.scaffold_starter == []
 
 
 def test_load_from_disk(tmp_path):
@@ -63,7 +93,7 @@ def test_unknown_file_key_rejected():
 
 def test_unsupported_version_rejected():
     with pytest.raises(ManifestError, match="unsupported manifest version"):
-        _validate_manifest_dict({"version": "2", "files": [{"source": "a", "target": "a"}]})
+        _validate_manifest_dict({"version": "3", "files": [{"source": "a", "target": "a"}]})
 
 
 def test_non_string_version_rejected():
@@ -103,6 +133,36 @@ def test_duplicate_targets_rejected():
         )
 
 
+def test_v2_duplicate_targets_across_categories_rejected():
+    with pytest.raises(ManifestError, match="duplicate target"):
+        _validate_manifest_dict(
+            {
+                "version": "2",
+                "byte_identical": [{"source": "a.md", "target": "x.md"}],
+                "scaffold_starter": [{"source": "b.md", "target": "x.md"}],
+            }
+        )
+
+
+def test_v2_unknown_top_level_key_rejected():
+    with pytest.raises(ManifestError, match="unknown top-level key"):
+        _validate_manifest_dict(
+            {
+                "version": "2",
+                "byte_identical": [{"source": "a", "target": "a"}],
+                "scaffold_starter": [],
+                "files": [],
+            }
+        )
+
+
+def test_v2_empty_byte_identical_rejected():
+    with pytest.raises(ManifestError, match="at least one entry"):
+        _validate_manifest_dict(
+            {"version": "2", "byte_identical": [], "scaffold_starter": []}
+        )
+
+
 def test_empty_path_rejected():
     with pytest.raises(ManifestError, match="non-empty"):
         _validate_manifest_dict({"version": "1", "files": [{"source": "", "target": "ok.md"}]})
@@ -126,4 +186,4 @@ def test_root_must_be_an_object():
 def test_manifest_error_is_value_error_for_back_compat():
     """Subclasses ValueError so existing except-blocks keep working."""
     with pytest.raises(ValueError):
-        _validate_manifest_dict({"version": "2", "files": [{"source": "a", "target": "a"}]})
+        _validate_manifest_dict({"version": "3", "files": [{"source": "a", "target": "a"}]})

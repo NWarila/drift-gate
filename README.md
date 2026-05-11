@@ -95,7 +95,8 @@ pass for any branch protection rule that requires both.
 
 ## The manifest
 
-A JSON file in `source-repo` enumerating which files must be mirrored. Schema:
+A JSON file in `source-repo` enumerating which files must be mirrored. Version
+1 is the compact byte-identical-only schema:
 
 ```json
 {
@@ -117,9 +118,34 @@ A JSON file in `source-repo` enumerating which files must be mirrored. Schema:
 the consumer repo where the byte-identical copy must exist. Source path
 == target path is the common case (use the same string twice).
 
-The manifest is validated on load via Pydantic with `extra=forbid`, so
-unknown keys, path traversal, absolute paths, duplicate targets, and
-unsupported versions all fail loudly instead of silently mis-comparing.
+Version 2 makes the propagation semantics explicit:
+
+```json
+{
+  "version": "2",
+  "byte_identical": [
+    {
+      "source": "policies/opa/terraform_plan.rego",
+      "target": "policies/opa/terraform_plan.rego"
+    }
+  ],
+  "scaffold_starter": [
+    {
+      "source": "policies/opa/synthetic_framework_plan.rego",
+      "target": "policies/opa/synthetic_framework_plan.rego"
+    }
+  ]
+}
+```
+
+`byte_identical` entries are enforced exactly like v1 `files` entries.
+`scaffold_starter` entries are validated for shape and duplicate targets but
+are not compared. Use them to document starter files that consumers are
+expected to rewrite, not mirror.
+
+The manifest is validated on load with stdlib-only checks, so unknown keys,
+path traversal, absolute paths, duplicate targets, and unsupported versions all
+fail loudly instead of silently mis-comparing.
 
 ## Reporting
 
