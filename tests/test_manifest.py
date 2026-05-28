@@ -35,9 +35,7 @@ def test_v2_manifest_enforces_byte_identical_only():
         {
             "version": "2",
             "byte_identical": [{"source": "policy.rego", "target": "policy.rego"}],
-            "scaffold_starter": [
-                {"source": "starter.rego", "target": "starter.rego"}
-            ],
+            "scaffold_starter": [{"source": "starter.rego", "target": "starter.rego"}],
         }
     )
     assert m.version == "2"
@@ -158,9 +156,7 @@ def test_v2_unknown_top_level_key_rejected():
 
 def test_v2_empty_byte_identical_rejected():
     with pytest.raises(ManifestError, match="at least one entry"):
-        _validate_manifest_dict(
-            {"version": "2", "byte_identical": [], "scaffold_starter": []}
-        )
+        _validate_manifest_dict({"version": "2", "byte_identical": [], "scaffold_starter": []})
 
 
 def test_empty_path_rejected():
