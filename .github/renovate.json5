@@ -1,0 +1,59 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+
+  // Renovate config for NWarila/drift-gate. This is a composite-action repo
+  // (action.yml) plus a small Python tool (PEP 621 pyproject.toml). It keeps
+  // the GitHub Actions `uses:` SHA pins in `action.yml` and `.github/workflows/`
+  // current, tracks the Python dev dependencies declared in `pyproject.toml`,
+  // and updates the `# renovate:`-annotated ruff pin used in CI.
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommits"
+  ],
+
+  "schedule": ["before 6am on monday"],
+  "labels": ["dependencies"],
+  "prConcurrentLimit": 5,
+  "minimumReleaseAge": "7 days",
+  "internalChecksFilter": "strict",
+
+  // drift-gate has no requirements.txt; Python deps live in pyproject.toml
+  // (PEP 621), so the `pep621` manager handles them. github-actions covers
+  // both action.yml and the reusable workflow. custom.regex picks up the
+  // `# renovate:`-annotated pip pin in ci.yml.
+  "enabledManagers": [
+    "github-actions",
+    "pep621",
+    "custom.regex"
+  ],
+
+  "customManagers": [
+    {
+      // Track the `# renovate:`-annotated pinned pip install in CI, e.g.
+      //   # renovate: datasource=pypi depName=ruff
+      //   run: python -m pip install --no-cache-dir ruff==0.13.0
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^\\.github/workflows/.*\\.ya?ml$/"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: packageName=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?\\s+(?:[^\\n]*\\s)?pip install (?:--no-cache-dir )?(?<depName2>[a-zA-Z0-9-._]+)==(?<currentValue>[^\\s'\"]+)"
+      ]
+    }
+  ],
+
+  "packageRules": [
+    {
+      "matchManagers": ["github-actions"],
+      "pinDigests": true,
+      "semanticCommitType": "ci",
+      "semanticCommitScope": "deps"
+    },
+    {
+      "matchManagers": ["pep621", "custom.regex"],
+      "semanticCommitType": "chore",
+      "semanticCommitScope": "deps"
+    }
+  ]
+}
