@@ -1,0 +1,14 @@
+flowchart TD
+    CF[Consumer repo\nCI workflow] -->|calls drift-gate action| RR[Resolve consumer-ref\nstep]
+    RR --> CO[Check out consumer\nactions/checkout]
+    RR --> CS[Check out source repo\nactions/checkout]
+    CO & CS --> ML[Load + validate manifest\nmanifest.py]
+    ML -->|per entry| CMP[compare_file\ncheck.py]
+    CMP -->|MATCH| ACC[Accumulate results]
+    CMP -->|DRIFT / MISSING\n/ SOURCE_MISSING| ACC
+    ACC --> CR[POST Check Run\nCheck Runs API]
+    CR -->|conclusion = success| GS[GitHub: check passes]
+    CR -->|conclusion = failure| GF[GitHub: check fails\nannotations inline on PR]
+    GS & GF --> RS[Repository ruleset\nevaluates required check]
+    RS -->|all required checks pass| MG[Merge allowed]
+    RS -->|any required check fails| MB[Merge blocked]
