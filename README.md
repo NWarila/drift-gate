@@ -3,6 +3,8 @@
 [![CI](https://github.com/NWarila/drift-gate/actions/workflows/ci.yml/badge.svg)](https://github.com/NWarila/drift-gate/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
+Architecture: [drift-check-flow](docs/diagrams/drift-check-flow.mmd) | Decision records: [docs/decision-records/](docs/decision-records/)
+
 A composite GitHub Action that detects when files in a consumer repository
 have drifted from a canonical source. Reports per-file pass/fail via the
 GitHub Check Runs API — failures appear inline in the PR's "Files changed"
